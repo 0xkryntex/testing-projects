@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador Visual de APK</title>
+    <style>
+        :root {
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --secondary: #FF9800;
+            --dark: #333;
+            --light: #f5f5f5;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --gray: #ccc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: white;
+            border-right: 1px solid var(--gray);
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e68900;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+        }
+        
+        .btn-success:hover {
+            background-color: #3d8b40;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+        
+        .preview-header {
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        
+        .phone-frame {
+            width: 300px;
+            height: 600px;
+            background-color: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            border: 10px solid #333;
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        .app-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            margin: -20px -20px 20px -20px;
+        }
+        
+        .element {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+        }
+        
+        .element.selected {
+            border-color: var(--primary);
+            background-color: #e3f2fd;
+        }
+        
+        .toolbar {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--gray);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .button-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .button-secondary:hover {
+            background-color: #e68900;
+        }
+        
+        .status-bar {
+            padding: 8px 15px;
+            background-color: var(--dark);
+            color: white;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--success);
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1100;
+        }
+        
+        .element-controls {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        
+        .element-controls .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span class="logo-icon">📱</span>
+            <h1>Criador Visual de APK</h1>
+        </div>
+        <div>
+            <button class="button button-secondary" id="newProjectBtn">Novo Projeto</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="sidebar">
+            <div class="section">
+                <div class="section-title">Configurações do App</div>
+                <div class="form-group">
+                    <label for="appName">Nome do App</label>
+                    <input type="text" id="appName" class="form-control" value="Meu App">
+                </div>
+                <div class="form-group">
+                    <label for="packageName">Pacote</label>
+                    <input type="text" id="packageName" class="form-control" value="com.exemplo.meuapp">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="minSdk">SDK Mínimo</label>
+                        <select id="minSdk" class="form-control">
+                            <option value="28">Android 9 (API 28)</option>
+                            <option value="29">Android 10 (API 29)</option>
+                            <option value="30" selected>Android 11 (API 30)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetSdk">SDK Alvo</label>
+                        <select id="targetSdk" class="form-control">
+                            <option value="30">Android 11 (API 30)</option>
+                            <option value="31">Android 12 (API 31)</option>
+                            <option value="33" selected>Android 13 (API 33)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Elementos de Tela</div>
+                <div class="button-group">
+                    <button class="btn" id="addTextView">Texto</button>
+                    <button class="btn" id="addButton">Botão</button>
+                    <button class="btn" id="addEditText">Campo de Texto</button>
+                    <button class="btn" id="addImageView">Imagem</button>
+                    <button class="btn" id="addCheckbox">Checkbox</button>
+                    <button class="btn" id="addSwitch">Switch</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Layout</div>
+                <div class="button-group">
+                    <button class="btn" id="setLinearVertical">Linear Vertical</button>
+                    <button class="btn" id="setLinearHorizontal">Linear Horizontal</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Telas</div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" id="addScreen">Adicionar Tela</button>
+                    <button class="btn" id="manageScreens">Gerenciar Telas</button>
+                </div>
+                <div id="screensList">
+                    <div class="screen-item selected" data-screen="main">Tela Principal</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Ações</div>
+                <div class="button-group">
+                    <button class="btn btn-success" id="addAction">Adicionar Ação</button>
+                    <button class="btn" id="setOnClick">Definir Clique</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h3>Visualização do App - <span id="currentScreenName">Tela Principal</span></h3>
+                    <div>
+                        <button class="button" id="refreshPreview">Atualizar Visualização</button>
+                    </div>
+                </div>
+                <div class="preview-content">
+                    <div class="phone-frame">
+                        <div class="phone-screen" id="phoneScreen">
+                            <div class="app-bar" id="appBar">Meu App</div>
+                            <div id="screenContent">
+                                <!-- Elementos serão adicionados aqui -->
+                                <div class="element" data-id="1">
+                                    <h3>Bem-vindo ao Meu App</h3>
+                                    <div class="element-controls">
+                                        <button class="btn btn-secondary">Editar</button>
+                                        <button class="btn btn-danger">Remover</button>
+                                    </div>
+                                </div>
+                                <div class="element" data-id="2">
+                                    <button class="button">Clique Aqui</button>
+                                    <div class="element-controls">
+                                        <button class="btn btn-secondary">Editar</button>
+                                        <button class="btn btn-danger">Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar">
+                <button class="button" id="generateCode">Gerar Código</button>
+                <button class="button button-secondary" id="testApp">Testar App</button>
+                <button class="button" id="downloadBtn">Baixar Projeto</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <div>Projeto: MeuApp | API: Android 9-16 | Compatibilidade: 32/64 bits | AndroidX</div>
+        <div>Status: ✅ Pronto</div>
+    </div>
+    
+    <!-- Modal para Novo Projeto -->
+    <div class="modal" id="newProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Novo Projeto</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="newProjectName">Nome do Projeto</label>
+                <input type="text" id="newProjectName" class="form-control" placeholder="Ex: MeuApp">
+            </div>
+            <div class="form-group">
+                <label for="newPackageName">Nome do Pacote</label>
+                <input type="text" id="newPackageName" class="form-control" placeholder="Ex: com.exemplo.meuapp">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="newMinSdk">SDK Mínimo</label>
+                    <select id="newMinSdk" class="form-control">
+                        <option value="28">Android 9 (API 28)</option>
+                        <option value="29">Android 10 (API 29)</option>
+                        <option value="30" selected>Android 11 (API 30)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newTargetSdk">SDK Alvo</label>
+                    <select id="newTargetSdk" class="form-control">
+                        <option value="30">Android 11 (API 30)</option>
+                        <option value="31">Android 12 (API 31)</option>
+                        <option value="33" selected>Android 13 (API 33)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <button class="button" id="createProjectBtn" style="width: 100%;">Criar Projeto</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Adicionar Tela -->
+    <div class="modal" id="addScreenModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Nova Tela</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="screenName">Nome da Tela</label>
+                <input type="text" id="screenName" class="form-control" placeholder="Ex: TelaConfiguracoes">
+            </div>
+            <div class="form-group">
+                <label for="screenTitle">Título da Tela</label>
+                <input type="text" id="screenTitle" class="form-control" placeholder="Ex: Configurações">
+            </div>
+            <div class="form-group">
+                <button class="button" id="addScreenBtn" style="width: 100%;">Adicionar Tela</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Editar Elemento -->
+    <div class="modal" id="editElementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Elemento</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="elementText">Texto</label>
+                <input type="text" id="elementText" class="form-control" placeholder="Texto do elemento">
+            </div>
+            <div class="form-group">
+                <label for="elementId">ID</label>
+                <input type="text" id="elementId" class="form-control" placeholder="Ex: meuBotao">
+            </div>
+            <div class="form-group">
+                <label for="elementSize">Tamanho do Texto</label>
+                <select id="elementSize" class="form-control">
+                    <option value="14sp">Pequeno</option>
+                    <option value="18sp" selected>Médio</option>
+                    <option value="24sp">Grande</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="button" id="saveElementBtn" style="width: 100%;">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast para notificações -->
+    <div class="toast" id="toast">Alterações salvas com sucesso!</div>
+    
+    <script>
+        // Dados do projeto
+        let projectData = {
+            name: "MeuApp",
+            packageName: "com.exemplo.meuapp",
+            minSdk: 30,
+            targetSdk: 33,
+            screens: {
+                "main": {
+                    name: "Tela Principal",
+                    elements: [
+                        { type: "text", id: "textView1", text: "Bem-vindo ao Meu App", size: "24sp" },
+                        { type: "button", id: "button1", text: "Clique Aqui", size: "18sp" }
+                    ]
+                }
+            },
+            currentScreen: "main"
+        };
+
+        // Elementos DOM
+        const newProjectBtn = document.getElementById('newProjectBtn');
+        const newProjectModal = document.getElementById('newProjectModal');
+        const createProjectBtn = document.getElementById('createProjectBtn');
+        const addScreenBtn = document.getElementById('addScreen');
+        const addScreenModal = document.getElementById('addScreenModal');
+        const confirmAddScreenBtn = document.getElementById('addScreenBtn');
+        const screensList = document.getElementById('screensList');
+        const phoneScreen = document.getElementById('phoneScreen');
+        const screenContent = document.getElementById('screenContent');
+        const appBar = document.getElementById('appBar');
+        const appNameInput = document.getElementById('appName');
+        const packageNameInput = document.getElementById('packageName');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const generateCodeBtn = document.getElementById('generateCode');
+        const toast = document.getElementById('toast');
+        const modalCloses = document.querySelectorAll('.modal-close');
+        const editElementModal = document.getElementById('editElementModal');
+        const saveElementBtn = document.getElementById('saveElementBtn');
+        const currentScreenName = document.getElementById('currentScreenName');
+
+        // Elementos para adicionar à tela
+        const addTextView = document.getElementById('addTextView');
+        const addButton = document.getElementById('addButton');
+        const addEditText = document.getElementById('addEditText');
+        const addImageView = document.getElementById('addImageView');
+        const addCheckbox = document.getElementById('addCheckbox');
+        const addSwitch = document.getElementById('addSwitch');
+
+        // Inicialização
+        function init() {
+            // Event listeners para botões principais
+            newProjectBtn.addEventListener('click', () => {
+                newProjectModal.style.display = 'flex';
+            });
+            
+            createProjectBtn.addEventListener('click', createNewProject);
+            
+            addScreenBtn.addEventListener('click', () => {
+                addScreenModal.style.display = 'flex';
+            });
+            
+            confirmAddScreenBtn.addEventListener('click', addNewScreen);
+            
+            downloadBtn.addEventListener('click', downloadProject);
+            
+            generateCodeBtn.addEventListener('click', generateCode);
+            
+            // Atualizar nome do app
+            appNameInput.addEventListener('input', updateAppName);
+            
+            // Fechar modais
+            modalCloses.forEach(closeBtn => {
+                closeBtn.addEventListener('click', () => {
+                    closeBtn.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+            
+            // Event listeners para adicionar elementos
+            addTextView.addEventListener('click', () => addElement('text'));
+            addButton.addEventListener('click', () => addElement('button'));
+            addEditText.addEventListener('click', () => addElement('editText'));
+            addImageView.addEventListener('click', () => addElement('image'));
+            addCheckbox.addEventListener('click', () => addElement('checkbox'));
+            addSwitch.addEventListener('click', () => addElement('switch'));
+            
+            // Event listener para salvar elemento editado
+            saveElementBtn.addEventListener('click', saveElementChanges);
+            
+            // Renderizar tela atual
+            renderScreen();
+        }
+
+        // Criar novo projeto
+        function createNewProject() {
+            const projectName = document.getElementById('newProjectName').value;
+            const packageName = document.getElementById('newPackageName').value;
+            const minSdk = document.getElementById('newMinSdk').value;
+            const targetSdk = document.getElementById('newTargetSdk').value;
+            
+            if (!projectName || !packageName) {
+                showToast('Preencha todos os campos obrigatórios!');
+                return;
+            }
+            
+            // Atualizar dados do projeto
+            projectData.name = projectName;
+            projectData.packageName = packageName;
+            projectData.minSdk = parseInt(minSdk);
+            projectData.targetSdk = parseInt(targetSdk);
+            projectData.screens = {
+                "main": {
+                    name: "Tela Principal",
+                    elements: []
+                }
+            };
+            
+            // Atualizar UI
+            appNameInput.value = projectName;
+            packageNameInput.value = packageName;
+            document.getElementById('minSdk').value = minSdk;
+            document.getElementById('targetSdk').value = targetSdk;
+            
+            // Atualizar lista de telas
+            updateScreensList();
+            
+            // Fechar modal e mostrar mensagem
+            newProjectModal.style.display = 'none';
+            showToast('Projeto criado com sucesso!');
+            
+            // Renderizar tela vazia
+            renderScreen();
+        }
+
+        // Adicionar nova tela
+        function addNewScreen() {
+            const screenName = document.getElementById('screenName').value;
+            const screenTitle = document.getElementById('screenTitle').value;
+            
+            if (!screenName || !screenTitle) {
+                showToast('Preencha todos os campos!');
+                return;
+            }
+            
+            // Adicionar tela aos dados
+            const screenId = screenName.toLowerCase().replace(/\s+/g, '_');
+            projectData.screens[screenId] = {
+                name: screenTitle,
+                elements: []
+            };
+            
+            // Atualizar UI
+            updateScreensList();
+            
+            // Fechar modal e mostrar mensagem
+            addScreenModal.style.display = 'none';
+            showToast('Tela adicionada com sucesso!');
+            
+            // Limpar campos
+            document.getElementById('screenName').value = '';
+            document.getElementById('screenTitle').value = '';
+        }
+
+        // Atualizar lista de telas na UI
+        function updateScreensList() {
+            screensList.innerHTML = '';
+            
+            for (const screenId in projectData.screens) {
+                const screen = projectData.screens[screenId];
+                const screenItem = document.createElement('div');
+                screenItem.className = 'screen-item';
+                if (screenId === projectData.currentScreen) {
+                    screenItem.classList.add('selected');
+                }
+                screenItem.textContent = screen.name;
+                screenItem.setAttribute('data-screen', screenId);
+                
+                screenItem.addEventListener('click', () => {
+                    // Remover seleção de todas as telas
+                    document.querySelectorAll('.screen-item').forEach(item => {
+                        item.classList.remove('selected');
+                    });
+                    
+                    // Selecionar esta tela
+                    screenItem.classList.add('selected');
+                    projectData.currentScreen = screenId;
+                    currentScreenName.textContent = screen.name;
+                    
+                    // Renderizar a tela
+                    renderScreen();
+                });
+                
+                screensList.appendChild(screenItem);
+            }
+        }
+
+        // Adicionar elemento à tela atual
+        function addElement(type) {
+            const screen = projectData.screens[projectData.currentScreen];
+            const elementId = generateId(type);
+            
+            // Configurações padrão para cada tipo
+            let elementConfig = {
+                type: type,
+                id: elementId,
+                text: getDefaultText(type),
+                size: "18sp"
+            };
+            
+            // Adicionar elemento aos dados
+            screen.elements.push(elementConfig);
+            
+            // Renderizar tela atualizada
+            renderScreen();
+            
+            showToast(`${getElementName(type)} adicionado!`);
+        }
+
+        // Renderizar a tela atual
+        function renderScreen() {
+            const screen = projectData.screens[projectData.currentScreen];
+            
+            // Limpar conteúdo atual
+            screenContent.innerHTML = '';
+            
+            // Adicionar cada elemento
+            screen.elements.forEach((element, index) => {
+                const elementDiv = document.createElement('div');
+                elementDiv.className = 'element';
+                elementDiv.setAttribute('data-index', index);
+                
+                // Criar elemento baseado no tipo
+                switch (element.type) {
+                    case 'text':
+                        elementDiv.innerHTML = `
+                            <h3 style="font-size: ${element.size}">${element.text}</h3>
+                            <div class="element-controls">
+                                <button class="btn btn-secondary edit-element">Editar</button>
+                                <button class="btn btn-danger remove-element">Remover</button>
+                            </div>
+                        `;
+                        break;
+                    case 'button':
+                        elementDiv.innerHTML = `
+                            <button class="button" style="font-size: ${element.size}">${element.text}</button>
+                            <div class="element-controls">
+                                <button class="btn btn-secondary edit-element">Editar</button>
+                                <button class="btn btn-danger remove-element">Remover</button>
+                            </div>
+                        `;
+                        break;
+                    case 'editText':
+                        elementDiv.innerHTML = `
+                            <input type="text" class="form-control" placeholder="${element.text}" style="font-size: ${element.size}">
+                            <div class="element-controls">
+                                <button class="btn btn-secondary edit-element">Editar</button>
+                                <button class="btn btn-danger remove-element">Remover</button>
+                            </div>
+                        `;
+                        break;
+                    case 'checkbox':
+                        elementDiv.innerHTML = `
+                            <div>
+                                <input type="checkbox" id="${element.id}">
+                                <label for="${element.id}" style="font-size: ${element.size}">${element.text}</label>
+                            </div>
+                            <div class="element-controls">
+                                <button class="btn btn-secondary edit-element">Editar</button>
+                                <button class="btn btn-danger remove-element">Remover</button>
+                            </div>
+                        `;
+                        break;
+                    case 'switch':
+                        elementDiv.innerHTML = `
+                            <div>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider round"></span>
+                                </label>
+                                <span style="font-size: ${element.size}">${element.text}</span>
+                            </div>
+                            <div class="element-controls">
+                                <button class="btn btn-secondary edit-element">Editar</button>
+                                <button class="btn btn-danger remove-element">Remover</button>
+                            </div>
+                        `;
+                        break;
+                    case 'image':
+                        elementDiv.innerHTML = `
+                            <div style="text-align: center;">
+                                <img src="https://via.placeholder.com/150" alt="${element.text}" style="max-width: 100%;">
+                                <p style="font-size: ${element.size}">${element.text}</p>
+                            </div>
+                            <div class="element-controls">
+                                <button class="btn btn-secondary edit-element">Editar</button>
+                                <button class="btn btn-danger remove-element">Remover</button>
+                            </div>
+                        `;
+                        break;
+                }
+                
+                screenContent.appendChild(elementDiv);
+            });
+            
+            // Adicionar event listeners para os botões de editar/remover
+            document.querySelectorAll('.edit-element').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('.element').getAttribute('data-index'));
+                    openEditElementModal(index);
+                });
+            });
+            
+            document.querySelectorAll('.remove-element').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('.element').getAttribute('data-index'));
+                    removeElement(index);
+                });
+            });
+        }
+
+        // Abrir modal para editar elemento
+        function openEditElementModal(index) {
+            const screen = projectData.screens[projectData.currentScreen];
+            const element = screen.elements[index];
+            
+            // Preencher campos do modal
+            document.getElementById('elementText').value = element.text;
+            document.getElementById('elementId').value = element.id;
+            document.getElementById('elementSize').value = element.size;
+            
+            // Salvar índice do elemento sendo editado
+            editElementModal.setAttribute('data-index', index);
+            
+            // Mostrar modal
+            editElementModal.style.display = 'flex';
+        }
+
+        // Salvar alterações do elemento
+        function saveElementChanges() {
+            const index = parseInt(editElementModal.getAttribute('data-index'));
+            const screen = projectData.screens[projectData.currentScreen];
+            const element = screen.elements[index];
+            
+            // Atualizar dados do elemento
+            element.text = document.getElementById('elementText').value;
+            element.id = document.getElementById('elementId').value;
+            element.size = document.getElementById('elementSize').value;
+            
+            // Fechar modal e renderizar tela
+            editElementModal.style.display = 'none';
+            renderScreen();
+            
+            showToast('Elemento atualizado com sucesso!');
+        }
+
+        // Remover elemento
+        function removeElement(index) {
+            const screen = projectData.screens[projectData.currentScreen];
+            screen.elements.splice(index, 1);
+            renderScreen();
+            showToast('Elemento removido!');
+        }
+
+        // Atualizar nome do app
+        function updateAppName() {
+            projectData.name = appNameInput.value;
+            appBar.textContent = appNameInput.value;
+        }
+
+        // Gerar código do projeto
+        function generateCode() {
+            showToast('Código gerado com sucesso! Verifique o console para visualizar.');
+            
+            // Aqui seria gerado todo o código Java e XML
+            // Por simplicidade, vamos apenas mostrar no console
+            console.log("=== CÓDIGO GERADO ===");
+            console.log("MainActivity.java:", generateMainActivityCode());
+            console.log("activity_main.xml:", generateLayoutCode());
+            console.log("AndroidManifest.xml:", generateManifestCode());
+        }
+
+        // Baixar projeto completo
+        function downloadProject() {
+            showToast('Preparando projeto para download...');
+            
+            // Em uma implementação real, aqui seria gerado um arquivo ZIP
+            // com toda a estrutura do projeto Android
+            setTimeout(() => {
+                showToast('Projeto pronto para download!');
+                
+                // Simulação de download
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + 
+                    encodeURIComponent('Conteúdo do projeto APK - Compatível com AIDE (Android 9-16, 32/64 bits, AndroidX)'));
+                element.setAttribute('download', `${projectData.name}.zip`);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }, 1500);
+        }
+
+        // Funções auxiliares
+        function generateId(type) {
+            return `${type}_${Date.now()}`;
+        }
+
+        function getDefaultText(type) {
+            const texts = {
+                'text': 'Novo Texto',
+                'button': 'Novo Botão',
+                'editText': 'Digite aqui...',
+                'image': 'Imagem',
+                'checkbox': 'Nova Opção',
+                'switch': 'Nova Configuração'
+            };
+            return texts[type] || 'Elemento';
+        }
+
+        function getElementName(type) {
+            const names = {
+                'text': 'Texto',
+                'button': 'Botão',
+                'editText': 'Campo de Texto',
+                'image': 'Imagem',
+                'checkbox': 'Checkbox',
+                'switch': 'Switch'
+            };
+            return names[type] || 'Elemento';
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Funções para gerar código (simulação)
+        function generateMainActivityCode() {
+            return `package ${projectData.packageName};
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+
+public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+}`;
+        }
+
+        function generateLayoutCode() {
+            return `<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+    
+    <!-- Layout gerado automaticamente -->
+</LinearLayout>`;
+        }
+
+        function generateManifestCode() {
+            return `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${projectData.packageName}">
+
+    <uses-sdk
+        android:minSdkVersion="${projectData.minSdk}"
+        android:targetSdkVersion="${projectData.targetSdk}" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="${projectData.name}"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="${projectData.name}">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>`;
+        }
+
+        // Inicializar a aplicação
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
