@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Projetos APK</title>
+    <style>
+        :root {
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --secondary: #FF9800;
+            --dark: #333;
+            --light: #f5f5f5;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --gray: #ccc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            color: var(--dark);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid var(--gray);
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .project-tree {
+            list-style: none;
+        }
+        
+        .project-tree li {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .project-tree li:hover {
+            background-color: var(--light);
+        }
+        
+        .project-tree li.active {
+            background-color: #e3f2fd;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .project-tree .folder::before {
+            content: "📁";
+            margin-right: 5px;
+        }
+        
+        .project-tree .file::before {
+            content: "📄";
+            margin-right: 5px;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .editor-container {
+            flex: 1;
+            display: flex;
+        }
+        
+        .code-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-right: 1px solid var(--gray);
+        }
+        
+        .editor-tabs {
+            display: flex;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid var(--gray);
+        }
+        
+        .editor-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-right: 1px solid var(--gray);
+            background-color: #f5f5f5;
+        }
+        
+        .editor-tab.active {
+            background-color: white;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .code-area {
+            flex: 1;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: none;
+            resize: none;
+            outline: none;
+        }
+        
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+        
+        .preview-header {
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        
+        .phone-frame {
+            width: 300px;
+            height: 600px;
+            background-color: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            border: 10px solid #333;
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        .app-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 500;
+            margin: -20px -20px 20px -20px;
+        }
+        
+        .button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .button-secondary {
+            background-color: var(--secondary);
+        }
+        
+        .button-secondary:hover {
+            background-color: #e68900;
+        }
+        
+        .button-danger {
+            background-color: var(--danger);
+        }
+        
+        .button-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .toolbar {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--gray);
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .status-bar {
+            padding: 8px 15px;
+            background-color: var(--dark);
+            color: white;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--success);
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span class="logo-icon">📱</span>
+            <h1>Criador de Projetos APK</h1>
+        </div>
+        <div>
+            <button class="button button-secondary" id="newProjectBtn">Novo Projeto</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h3>Estrutura do Projeto</h3>
+            <ul class="project-tree">
+                <li class="folder active">app
+                    <ul>
+                        <li class="file" data-file="manifest">AndroidManifest.xml</li>
+                        <li class="folder">java
+                            <ul>
+                                <li class="file" data-file="main-activity">MainActivity.java</li>
+                                <li class="file" data-file="second-activity">SecondActivity.java</li>
+                            </ul>
+                        </li>
+                        <li class="folder">res
+                            <ul>
+                                <li class="folder">layout
+                                    <ul>
+                                        <li class="file" data-file="activity-main">activity_main.xml</li>
+                                        <li class="file" data-file="activity-second">activity_second.xml</li>
+                                    </ul>
+                                </li>
+                                <li class="folder">values
+                                    <ul>
+                                        <li class="file" data-file="strings">strings.xml</li>
+                                        <li class="file" data-file="colors">colors.xml</li>
+                                        <li class="file" data-file="styles">styles.xml</li>
+                                    </ul>
+                                </li>
+                                <li class="folder">drawable</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="folder">gradle</li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <div class="editor-container">
+                <div class="code-editor">
+                    <div class="editor-tabs">
+                        <div class="editor-tab active" data-file="main-activity">MainActivity.java</div>
+                        <div class="editor-tab" data-file="activity-main">activity_main.xml</div>
+                        <div class="editor-tab" data-file="manifest">AndroidManifest.xml</div>
+                    </div>
+                    <textarea class="code-area" id="codeEditor" spellcheck="false"></textarea>
+                </div>
+                
+                <div class="preview-container">
+                    <div class="preview-header">
+                        <h3>Visualização do App</h3>
+                        <div>
+                            <button class="button" id="refreshPreview">Atualizar</button>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="phone-frame">
+                            <div class="phone-screen" id="phoneScreen">
+                                <div class="app-bar">Meu App</div>
+                                <h2>Bem-vindo ao Meu App</h2>
+                                <p>Esta é uma visualização da tela principal do seu aplicativo.</p>
+                                <button class="button" style="margin-top: 20px;">Botão de Exemplo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="toolbar">
+                <button class="button" id="saveBtn">Salvar Alterações</button>
+                <button class="button button-secondary" id="addScreenBtn">Adicionar Tela</button>
+                <button class="button button-secondary" id="addElementBtn">Adicionar Elemento</button>
+                <button class="button" id="downloadBtn">Baixar Projeto</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <div>Projeto: MeuApp | API: Android 9-16 | Compatibilidade: 32/64 bits</div>
+        <div>Status: ✅ Pronto</div>
+    </div>
+    
+    <!-- Modal para Novo Projeto -->
+    <div class="modal" id="newProjectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Novo Projeto</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="projectName">Nome do Projeto</label>
+                <input type="text" id="projectName" class="form-control" placeholder="Ex: MeuApp">
+            </div>
+            <div class="form-group">
+                <label for="packageName">Nome do Pacote</label>
+                <input type="text" id="packageName" class="form-control" placeholder="Ex: com.exemplo.meuapp">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="minSdk">SDK Mínimo</label>
+                    <select id="minSdk" class="form-control">
+                        <option value="28">Android 9 (API 28)</option>
+                        <option value="29">Android 10 (API 29)</option>
+                        <option value="30">Android 11 (API 30)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="targetSdk">SDK Alvo</label>
+                    <select id="targetSdk" class="form-control">
+                        <option value="30">Android 11 (API 30)</option>
+                        <option value="31">Android 12 (API 31)</option>
+                        <option value="33">Android 13 (API 33)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <button class="button" style="width: 100%;">Criar Projeto</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Adicionar Tela -->
+    <div class="modal" id="addScreenModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Adicionar Nova Tela</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="screenName">Nome da Tela</label>
+                <input type="text" id="screenName" class="form-control" placeholder="Ex: TelaConfiguracoes">
+            </div>
+            <div class="form-group">
+                <label for="screenTitle">Título da Tela</label>
+                <input type="text" id="screenTitle" class="form-control" placeholder="Ex: Configurações">
+            </div>
+            <div class="form-group">
+                <button class="button" style="width: 100%;">Adicionar Tela</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast para notificações -->
+    <div class="toast" id="toast">Alterações salvas com sucesso!</div>
+    
+    <script>
+        // Dados do projeto
+        let projectData = {
+            name: "MeuApp",
+            packageName: "com.exemplo.meuapp",
+            minSdk: 28,
+            targetSdk: 30,
+            files: {
+                "main-activity": `package com.exemplo.meuapp;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.content.Intent;
+
+public class MainActivity extends AppCompatActivity {
+    
+    private TextView textView;
+    private Button button;
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        
+        textView = findViewById(R.id.textView);
+        button = findViewById(R.id.button);
+        
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.setText("Botão clicado!");
+                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+}`,
+                "activity-main": `<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Bem-vindo ao Meu App"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clique Aqui"
+        android:textSize="18sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Esta é uma visualização da tela principal do seu aplicativo."
+        android:textSize="16sp"
+        android:layout_marginTop="24dp" />
+
+</LinearLayout>`,
+                "manifest": `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.exemplo.meuapp">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SecondActivity" />
+    </application>
+
+</manifest>`,
+                "strings": `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MeuApp</string>
+    <string name="hello_world">Olá Mundo!</string>
+</resources>`,
+                "colors": `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#FF9800</color>
+</resources>`,
+                "styles": `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+</resources>`,
+                "second-activity": `package com.exemplo.meuapp;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+
+public class SecondActivity extends AppCompatActivity {
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_second);
+    }
+}`,
+                "activity-second": `<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Segunda Tela"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+</LinearLayout>`
+            },
+            currentFile: "main-activity"
+        };
+
+        // Elementos DOM
+        const codeEditor = document.getElementById('codeEditor');
+        const phoneScreen = document.getElementById('phoneScreen');
+        const fileTreeItems = document.querySelectorAll('.project-tree .file');
+        const editorTabs = document.querySelectorAll('.editor-tab');
+        const newProjectBtn = document.getElementById('newProjectBtn');
+        const newProjectModal = document.getElementById('newProjectModal');
+        const addScreenModal = document.getElementById('addScreenModal');
+        const addScreenBtn = document.getElementById('addScreenBtn');
+        const addElementBtn = document.getElementById('addElementBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const refreshPreview = document.getElementById('refreshPreview');
+        const toast = document.getElementById('toast');
+        const modalCloses = document.querySelectorAll('.modal-close');
+
+        // Inicialização
+        function init() {
+            loadFile(projectData.currentFile);
+            
+            // Event listeners para arquivos na árvore
+            fileTreeItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const file = item.getAttribute('data-file');
+                    loadFile(file);
+                    
+                    // Atualizar aba ativa
+                    editorTabs.forEach(tab => {
+                        if (tab.getAttribute('data-file') === file) {
+                            tab.classList.add('active');
+                        } else {
+                            tab.classList.remove('active');
+                        }
+                    });
+                    
+                    // Atualizar item ativo na árvore
+                    fileTreeItems.forEach(treeItem => {
+                        treeItem.classList.remove('active');
+                    });
+                    item.classList.add('active');
+                });
+            });
+            
+            // Event listeners para abas do editor
+            editorTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const file = tab.getAttribute('data-file');
+                    loadFile(file);
+                    
+                    // Atualizar aba ativa
+                    editorTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Atualizar item ativo na árvore
+                    fileTreeItems.forEach(treeItem => {
+                        if (treeItem.getAttribute('data-file') === file) {
+                            treeItem.classList.add('active');
+                        } else {
+                            treeItem.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Event listeners para botões
+            newProjectBtn.addEventListener('click', () => {
+                newProjectModal.style.display = 'flex';
+            });
+            
+            addScreenBtn.addEventListener('click', () => {
+                addScreenModal.style.display = 'flex';
+            });
+            
+            saveBtn.addEventListener('click', saveFile);
+            
+            downloadBtn.addEventListener('click', downloadProject);
+            
+            refreshPreview.addEventListener('click', updatePreview);
+            
+            // Fechar modais
+            modalCloses.forEach(closeBtn => {
+                closeBtn.addEventListener('click', () => {
+                    closeBtn.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            // Fechar modal ao clicar fora
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+            
+            // Atualizar preview quando o código mudar
+            codeEditor.addEventListener('input', updatePreview);
+            
+            // Inicializar preview
+            updatePreview();
+        }
+
+        // Carregar arquivo no editor
+        function loadFile(file) {
+            projectData.currentFile = file;
+            codeEditor.value = projectData.files[file] || '';
+        }
+
+        // Salvar arquivo atual
+        function saveFile() {
+            const currentFile = projectData.currentFile;
+            projectData.files[currentFile] = codeEditor.value;
+            showToast('Arquivo salvo com sucesso!');
+        }
+
+        // Atualizar visualização
+        function updatePreview() {
+            if (projectData.currentFile === 'activity-main') {
+                // Simulação básica de renderização do layout
+                const xmlContent = codeEditor.value;
+                
+                // Extrair texto do TextView
+                const textMatch = xmlContent.match(/android:text="([^"]*)"/);
+                if (textMatch) {
+                    const textElements = phoneScreen.querySelectorAll('h2, p');
+                    if (textElements.length > 0) {
+                        textElements[0].textContent = textMatch[1];
+                    }
+                }
+                
+                // Extrair texto do botão
+                const buttonTextMatch = xmlContent.match(/android:text="([^"]*)"[^>]*android:id="@\+id\/button"/);
+                if (buttonTextMatch) {
+                    const button = phoneScreen.querySelector('button');
+                    if (button) {
+                        button.textContent = buttonTextMatch[1];
+                    }
+                }
+            }
+        }
+
+        // Baixar projeto completo
+        function downloadProject() {
+            showToast('Preparando projeto para download...');
+            
+            // Em uma implementação real, aqui seria gerado um arquivo ZIP
+            // com toda a estrutura do projeto Android
+            setTimeout(() => {
+                showToast('Projeto pronto para download!');
+                
+                // Simulação de download
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent('Conteúdo do projeto APK'));
+                element.setAttribute('download', `${projectData.name}.zip`);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }, 1500);
+        }
+
+        // Mostrar notificação toast
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        // Inicializar a aplicação
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
