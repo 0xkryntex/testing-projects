@@ -2027,3 +2027,314 @@ public class MainActivity extends AppCompatActivity {
 <resources>
     <color name="colorPrimary">${AppState.project.primaryColor}</color>
     <color name="colorPrimaryDark">${AppState.project.primaryColor}
+        <color name="colorAccent">${AppState.project.secondaryColor}</color>
+</resources>`;
+            },
+            
+            generateStyles() {
+                return `<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+</resources>`;
+            },
+            
+            generateReadme() {
+                return `# ${AppState.project.name}
+
+Projeto Android gerado pelo APK Builder Pro
+
+## Características
+- Compatível com AIDE
+- Android ${AppState.project.minSdk === 28 ? '9' : '11'}+ (API ${AppState.project.minSdk})
+- Suporte 32-bit e 64-bit
+- AndroidX
+- Sem lambdas
+
+## Estrutura
+- MainActivity.java
+- activity_main.xml
+- AndroidManifest.xml
+- build.gradle
+
+Gerado em: ${new Date().toLocaleDateString()}`;
+            },
+            
+            downloadProject() {
+                const projectData = this.generateProject();
+                const zip = new JSZip();
+                
+                // Adicionar arquivos ao ZIP
+                Object.entries(projectData.files).forEach(([path, content]) => {
+                    zip.file(path, content);
+                });
+                
+                // Gerar e baixar ZIP
+                zip.generateAsync({type: "blob"}).then(function(content) {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(content);
+                    link.download = `${AppState.project.name.replace(/\s+/g, '_')}.zip`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                });
+            }
+        };
+
+        // ===== INICIALIZAÇÃO DA APLICAÇÃO =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar renderização
+            Renderer.renderScreen(AppState.currentScreen);
+            Renderer.updateScreensList();
+            
+            // Configurar abas da sidebar
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Atualizar abas ativas
+                    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                    AppState.ui.activeTab = tabId;
+                });
+            });
+            
+            // Botões de adicionar elementos
+            document.querySelectorAll('[data-element]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const elementType = this.getAttribute('data-element');
+                    const elementConfig = UIElements[elementType];
+                    
+                    if (elementConfig) {
+                        const newElement = {
+                            id: `${elementType}_${Date.now()}`,
+                            type: elementType,
+                            ...elementConfig.defaultConfig
+                        };
+                        
+                        AppState.screens[AppState.currentScreen].elements.push(newElement);
+                        Renderer.renderScreen(AppState.currentScreen);
+                        
+                        // Selecionar o novo elemento
+                        AppState.selectedElement = newElement.id;
+                        Renderer.highlightSelectedElement();
+                        PropertiesEditor.loadElementProperties(newElement);
+                    }
+                });
+            });
+            
+            // Botão nova tela
+            document.getElementById('addScreenBtn').addEventListener('click', function() {
+                document.getElementById('newScreenModal').style.display = 'flex';
+            });
+            
+            // Confirmar nova tela
+            document.getElementById('confirmNewScreen').addEventListener('click', function() {
+                const name = document.getElementById('newScreenName').value;
+                const type = document.getElementById('newScreenType').value;
+                const layout = document.getElementById('newScreenLayout').value;
+                
+                if (name) {
+                    const screenId = name.toLowerCase().replace(/\s+/g, '_');
+                    
+                    AppState.screens[screenId] = {
+                        id: screenId,
+                        name: name,
+                        type: type,
+                        layout: layout,
+                        backgroundColor: "#ffffff",
+                        elements: []
+                    };
+                    
+                    AppState.currentScreen = screenId;
+                    Renderer.renderScreen(screenId);
+                    Renderer.updateScreensList();
+                    
+                    document.getElementById('newScreenModal').style.display = 'none';
+                    document.getElementById('newScreenName').value = '';
+                }
+            });
+            
+            // Cancelar nova tela
+            document.getElementById('cancelNewScreen').addEventListener('click', function() {
+                document.getElementById('newScreenModal').style.display = 'none';
+            });
+            
+            // Fechar modais
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+            
+            // Exportar projeto
+            document.getElementById('exportProjectBtn').addEventListener('click', function() {
+                document.getElementById('exportModal').style.display = 'flex';
+            });
+            
+            document.getElementById('confirmExport').addEventListener('click', function() {
+                Exporter.downloadProject();
+                document.getElementById('exportModal').style.display = 'none';
+            });
+            
+            document.getElementById('cancelExport').addEventListener('click', function() {
+                document.getElementById('exportModal').style.display = 'none';
+            });
+            
+            // Atualizar preview
+            document.getElementById('previewRefreshBtn').addEventListener('click', function() {
+                Renderer.renderScreen(AppState.currentScreen);
+            });
+            
+            // Limpar tela
+            document.getElementById('clearScreenBtn').addEventListener('click', function() {
+                if (confirm('Tem certeza que deseja limpar todos os elementos desta tela?')) {
+                    AppState.screens[AppState.currentScreen].elements = [];
+                    Renderer.renderScreen(AppState.currentScreen);
+                }
+            });
+            
+            // Testar app
+            document.getElementById('testAppBtn').addEventListener('click', function() {
+                alert('Modo de teste ativado! Navegue pela interface para testar seu app.');
+            });
+            
+            // Atualizar informações do projeto em tempo real
+            document.getElementById('projectName').addEventListener('input', function() {
+                AppState.project.name = this.value;
+                document.getElementById('appBarTitle').textContent = this.value;
+            });
+            
+            document.getElementById('packageName').addEventListener('input', function() {
+                AppState.project.packageName = this.value;
+            });
+            
+            // Sistema de arrastar e soltar para elementos
+            let draggedElement = null;
+            
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('ui-element')) {
+                    draggedElement = e.target;
+                    e.target.classList.add('dragging');
+                }
+            });
+            
+            document.addEventListener('dragend', function(e) {
+                if (e.target.classList.contains('ui-element')) {
+                    e.target.classList.remove('dragging');
+                    draggedElement = null;
+                }
+            });
+            
+            document.getElementById('screenContent').addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            document.getElementById('screenContent').addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (draggedElement) {
+                    // Implementar reordenação de elementos
+                    const elementId = draggedElement.getAttribute('data-element-id');
+                    const screen = AppState.screens[AppState.currentScreen];
+                    const elementIndex = screen.elements.findIndex(el => el.id === elementId);
+                    
+                    // Reordenar baseado na posição do drop
+                    // (implementação simplificada)
+                    Renderer.renderScreen(AppState.currentScreen);
+                }
+            });
+            
+            // Inicializar com a primeira tela selecionada
+            AppState.currentScreen = 'main';
+            Renderer.renderScreen('main');
+            Renderer.updateScreensList();
+        });
+
+        // ===== SISTEMA DE AJUDA E TUTORIAL =====
+        const Tutorial = {
+            showWelcome() {
+                if (!localStorage.getItem('apkBuilderWelcomeShown')) {
+                    setTimeout(() => {
+                        alert('Bem-vindo ao APK Builder Pro! 🎉\n\nComece adicionando elementos à tela usando o painel lateral, depois ajuste suas propriedades. Quando estiver pronto, exporte seu projeto para o AIDE!');
+                        localStorage.setItem('apkBuilderWelcomeShown', 'true');
+                    }, 1000);
+                }
+            },
+            
+            showTip(message) {
+                const tip = document.createElement('div');
+                tip.className = 'tip-message';
+                tip.innerHTML = `
+                    <div class="tip-content">
+                        <i class="fas fa-lightbulb"></i>
+                        ${message}
+                        <button class="tip-close">&times;</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(tip);
+                
+                setTimeout(() => {
+                    tip.remove();
+                }, 5000);
+                
+                tip.querySelector('.tip-close').addEventListener('click', () => {
+                    tip.remove();
+                });
+            }
+        };
+
+        // ===== ESTILOS ADICIONAIS PARA O TUTORIAL =====
+        const tutorialStyles = `
+            .tip-message {
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideInRight 0.5s ease;
+                max-width: 300px;
+            }
+            
+            .tip-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .tip-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.2rem;
+                cursor: pointer;
+                margin-left: auto;
+            }
+            
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = tutorialStyles;
+        document.head.appendChild(styleSheet);
+
+        // Iniciar tutorial
+        Tutorial.showWelcome();
+    </script>
+
+    <!-- BIBLIOTECA ZIP PARA EXPORTAÇÃO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</body>
+</html>
